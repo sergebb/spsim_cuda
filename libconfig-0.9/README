@@ -1,0 +1,35 @@
+
+To produce a PDF manual, issue the command "make pdf" after running
+configure.
+
+The `samples' subdirectory contains some examples of using libconfig
+from C and C++.
+
+
+Notes on version 0.9:
+
+In order to implement all of the feature/enhancement requests in an
+elegant and self-consistent way, the configuration grammar had to be
+changed in a non-backward-compatible way. In particular, groups are
+now values, so the old syntax:
+
+group
+{
+   ...
+}
+
+must now be written as:
+
+group =
+{
+   ...
+};
+
+Note that the trailing semicolon, which was previously optional, is
+now required. Also note that a colon (':') can be used in place of the
+equals sign.
+
+
+The next release of libconfig will be version 1.0, and will not
+include any further feature enhancements; it will be a maintenance
+release to address any bugs discovered in version 0.9.
