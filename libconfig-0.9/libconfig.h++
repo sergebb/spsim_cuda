@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string>
 #include <map>
+#include <climits>
 
 namespace libconfig
 {
