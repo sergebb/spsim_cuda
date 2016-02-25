@@ -23,8 +23,6 @@
 
 #include "config.h"
 
-#include <fftw3.h>
-
 /*
    We're always gonna use 3D diffraction patterns
 
@@ -41,7 +39,8 @@ typedef struct{
   /* scattering intensity */
   float * I;
   /* scattering pattern */
-  fftw_complex * F;
+  double * F_R;
+  double * F_I;
   /* maximum scattering vector on each dimension */
   float max_s[3];
   /* scattering vector grid spacing on each dimension */

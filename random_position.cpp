@@ -33,5 +33,5 @@ void get_random_shift_molecule_in_px(float *shift_x,float *shift_y, Options *opt
     *shift_y = get_random_number( opts->position_std );
 
     //printf("%f\t%f\n",*shift_y,*shift_x);
-    std::cerr << *shift_y << "\t" << *shift_x << std::endl;
+    //std::cerr << *shift_y << "\t" << *shift_x << std::endl;
 }

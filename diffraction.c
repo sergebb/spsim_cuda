@@ -210,8 +210,8 @@ Diffraction_Pattern * compute_pattern_on_list(Molecule * mol, float * HKL_list, 
     atomsf_initialized = 1;
   }
 
-  res->F = malloc(sizeof(fftw_complex)*HKL_list_size);
-  res->I = malloc(sizeof(float)*HKL_list_size);
+  res->F_R = malloc(sizeof(double)*HKL_list_size);
+  res->F_I = malloc(sizeof(double)*HKL_list_size);
   res->HKL_list = malloc(sizeof(float)*3*HKL_list_size);
   memcpy(res->HKL_list,HKL_list,sizeof(float)*3*HKL_list_size);
   res->HKL_list_size = HKL_list_size;
@@ -237,8 +237,8 @@ Diffraction_Pattern * compute_pattern_on_list(Molecule * mol, float * HKL_list, 
 
 #endif*/
 
-    res->F[i][0] = 0;
-    res->F[i][1] = 0;
+    res->F_R[i] = 0;
+    res->F_I[i] = 0;
     scattering_vector_length = sqrt(HKL_list[3*i]*HKL_list[3*i]+HKL_list[3*i+1]*HKL_list[3*i+1]+HKL_list[3*i+2]*HKL_list[3*i+2]);
     for(j = 0;j<ELEMENTS;j++){
       if(is_element_in_molecule[j]){
@@ -247,13 +247,14 @@ Diffraction_Pattern * compute_pattern_on_list(Molecule * mol, float * HKL_list, 
     }
     for(j = 0 ;j< mol->natoms;j++){
       scattering_factor = scattering_factor_cache[mol->atomic_number[j]];
-      res->F[i][0] += scattering_factor*cos(2*M_PI*(HKL_list[3*i]*mol->pos[j*3]+HKL_list[3*i+1]*mol->pos[j*3+1]+HKL_list[3*i+2]*mol->pos[j*3+2]));
-      res->F[i][1] += scattering_factor*sin(2*M_PI*(HKL_list[3*i]*mol->pos[j*3]+HKL_list[3*i+1]*mol->pos[j*3+1]+HKL_list[3*i+2]*mol->pos[j*3+2]));
+      res->F_R[i] += scattering_factor*cos(2*M_PI*(HKL_list[3*i]*mol->pos[j*3]+HKL_list[3*i+1]*mol->pos[j*3+1]+HKL_list[3*i+2]*mol->pos[j*3+2]));
+      res->F_I[i] += scattering_factor*sin(2*M_PI*(HKL_list[3*i]*mol->pos[j*3]+HKL_list[3*i+1]*mol->pos[j*3+1]+HKL_list[3*i+2]*mol->pos[j*3+2]));
     }
-    res->I[i] = res->F[i][0] * res->F[i][0] + res->F[i][1] * res->F[i][1];
+    res->I[i] = res->F_R[i] * res->F_R[i] + res->F_I[i] * res->F_I[i];
   }
   syncronize_patterns(res);
-  free(res->F);
+  free(res->F_R);
+  free(res->F_I);
   return res;
 }
 
@@ -284,7 +285,8 @@ Diffraction_Pattern * load_pattern_from_file(Detector * det,char * filename,
   res->HKL_list_size = HKL_list_size;
 
   res->I = read_VTK_to_array(det->nx,det->ny,filename);
-  res->F = 0;
+  res->F_R = 0;
+  res->F_I = 0;
   return res;
 }
 
