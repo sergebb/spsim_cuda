@@ -212,6 +212,7 @@ Diffraction_Pattern * compute_pattern_on_list(Molecule * mol, float * HKL_list, 
 
   res->F_R = malloc(sizeof(double)*HKL_list_size);
   res->F_I = malloc(sizeof(double)*HKL_list_size);
+  res->I = malloc(sizeof(float)*HKL_list_size);
   res->HKL_list = malloc(sizeof(float)*3*HKL_list_size);
   memcpy(res->HKL_list,HKL_list,sizeof(float)*3*HKL_list_size);
   res->HKL_list_size = HKL_list_size;
