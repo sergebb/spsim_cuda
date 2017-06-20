@@ -20,3 +20,4 @@
 
 Molecule * get_Molecule_from_formula(Chem_Formula * form, float * box);
 Molecule * get_Molecule_from_pdb(char * filename);
+Molecule * dublicate_molecule_with_shift(Molecule *mol, double shift_x,double shift_y,double shift_z );

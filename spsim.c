@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "config.h"
 #include "diffraction.h"
 #include "molecule.h"
@@ -37,6 +38,7 @@ int main(int argc, char ** argv) {
     int HKL_list_size = 0;
     Molecule * mol = NULL;
     Molecule * original_mol = NULL;
+    Molecule * double_mol;
 #ifdef MPI
     MPI_Init(&argc, &argv);
 #endif
@@ -71,12 +73,26 @@ int main(int argc, char ** argv) {
         if (opts->random_orientation) {
             if (mol != NULL) free(mol);
             mol = random_rotate_molecule(original_mol);
+            // mol = random_rotate_molecule_2_angles(original_mol);
+            
         }else if(opts->uniform_rotation){
             if (mol != NULL) free(mol);
             mol = uniform_rotate_molecule_2_angles(original_mol,(i-1),opts->number_of_experiments);
         }else{
             mol = original_mol;
         }
+        if (opts->particle_num_max > 1){
+            int particle_num = (int)((double)rand()/(double)RAND_MAX*(opts->particle_num_max - opts->particle_num_min + 1) + opts->particle_num_min);
+            Molecule *tmp_mol = original_mol;
+            for(int i=1; i<particle_num; i++){
+                double shift_x = ((double)rand()/(double)RAND_MAX*(opts->particle_dist_max - opts->particle_dist_min)+opts->particle_dist_min); //30-100 nm per image
+                double_mol = add_molecule_with_shift(tmp_mol, original_mol, shift_x, 0, 0 );
+                if (tmp_mol != original_mol) free(tmp_mol);
+                tmp_mol = double_mol;
+            }
+            mol = random_rotate_molecule(tmp_mol);
+        }
+
         if(opts->random_position){
             HKL_list = get_HKL_list_for_detector(opts, opts->experiment, &HKL_list_size);
         }

@@ -120,6 +120,10 @@ typedef struct {
   short intermediate_files;
   short random_position;
   float position_std;
+  unsigned int particle_num_min;
+  unsigned int particle_num_max;
+  float particle_dist_min;
+  float particle_dist_max;
 
   char pdb_filename[1024];
   char sf_filename[1024];

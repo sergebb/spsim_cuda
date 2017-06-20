@@ -90,6 +90,47 @@ Molecule *rotate_molecule(Molecule *mol, double alpha, double beta, double gamma
     return res;
 }
 
+Molecule *add_molecule_with_shift(Molecule *orig_mol, Molecule *added_mol, double shift_x,double shift_y,double shift_z ){
+
+    Molecule *res = malloc(sizeof(Molecule));
+    int i,d;
+
+    Molecule *mol_1 = random_rotate_molecule(orig_mol);
+    Molecule *mol_2 = random_rotate_molecule(added_mol);
+
+    res->atomic_number = NULL;
+    res->pos = NULL;
+    res->natoms = orig_mol->natoms + added_mol->natoms;
+    res->atomic_number = malloc(sizeof (int)*res->natoms);
+    res->pos = malloc(sizeof (float)*res->natoms * 3);
+    // float max_x=mol_1->pos[0],min_x =mol_1->pos[0];
+    for (d = 0; d < 3; d++) {
+            res->box[d] = orig_mol->box[d]; //box*pos gives physical positions
+    }
+    for (i = 0; i < orig_mol->natoms; i++) {
+        res->atomic_number[i] = orig_mol->atomic_number[i];
+
+        res->pos[3 * i] = mol_1->pos[3 * i];
+        res->pos[3 * i + 1] = mol_1->pos[3 * i + 1];
+        res->pos[3 * i + 2] = mol_1->pos[3 * i + 2];
+    }
+
+    for (i = 0; i < added_mol->natoms; i++) {
+        res->atomic_number[i+orig_mol->natoms] = added_mol->atomic_number[i];
+
+        res->pos[3*orig_mol->natoms + 3 * i ] = mol_2->pos[3 * i] + shift_x;
+        res->pos[3*orig_mol->natoms + 3 * i + 1] = mol_2->pos[3 * i + 1] + shift_y;
+        res->pos[3*orig_mol->natoms + 3 * i + 2] = mol_2->pos[3 * i + 2] + shift_z;
+    }
+
+    free(mol_1);
+    free(mol_2);
+
+    return res;
+}
+
+
+
 Molecule *random_rotate_molecule(Molecule *mol){
     double alpha, beta, gamma;
 
@@ -97,7 +138,22 @@ Molecule *random_rotate_molecule(Molecule *mol){
     beta  = ((double)rand()/(double)RAND_MAX)*(M_PI) - M_PI/2; // (-Pi/2,Pi/2)
     gamma = ((double)rand()/(double)RAND_MAX)*(2*M_PI) - M_PI; // (-Pi,Pi)
 
-    //printf("%f\t%f\t%f\n",alpha,beta,gamma);
+    // printf("%f\t%f\t%f\n",alpha,beta,gamma);
+
+    return rotate_molecule( mol, alpha, beta, gamma );
+
+}
+
+Molecule *random_rotate_molecule_2_angles(Molecule *mol){
+    double alpha, beta, gamma;
+
+    alpha = ((double)rand()/(double)RAND_MAX)*(2*M_PI) - M_PI; // (-Pi,Pi)
+    // beta  = ((double)rand()/(double)RAND_MAX)*(M_PI) - M_PI/2; // (-Pi/2,Pi/2)
+    // gamma = ((double)rand()/(double)RAND_MAX)*(2*M_PI) - M_PI; // (-Pi,Pi)
+    beta = 0;
+    gamma = 0;
+
+    printf("%f\t%f\t%f\n",alpha,beta,gamma);
 
     return rotate_molecule( mol, alpha, beta, gamma );
 
@@ -156,7 +212,7 @@ Molecule *uniform_rotate_molecule_2_angles(Molecule *mol, int iteration, int tot
     beta  = (i_beta/(double)N_beta - 0.5)*M_PI; // (-Pi/2,Pi/2)
     gamma = (i_gamma/(double)N_gamma - 0.5)*M_PI*2; // (-Pi,Pi)
 
-//    printf("%5.2f,%5.2f,%5.2f\n", alpha,beta,gamma);
+   printf("%5.2f,%5.2f,%5.2f\n", alpha,beta,gamma);
 
     return rotate_molecule( mol, alpha, beta, gamma );
 }

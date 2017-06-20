@@ -26,7 +26,10 @@ Molecule *rotate_molecule(Molecule *mol, double alpha, double beta, double gamma
 Molecule *uniform_rotate_molecule(Molecule *mol, int iteration, int total);
 Molecule *uniform_rotate_molecule_2_angles(Molecule *mol, int iteration, int total);
 Molecule *random_rotate_molecule(Molecule *mol);
+Molecule *random_rotate_molecule_2_angles(Molecule *mol);
 int recomended_total_number(int total_in_first_angle);
+
+Molecule *add_molecule_with_shift(Molecule *orig_mol, Molecule *added_mol, double shift_x,double shift_y,double shift_z );
 
 #ifdef	__cplusplus
 }

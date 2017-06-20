@@ -42,6 +42,8 @@ Options * set_defaults(){
   opt->binary_output = 0;//false
   opt->random_position = 0;
   opt->position_std = 1.0;
+  opt->particle_num_min = opt->particle_num_max = 1;
+  opt->particle_dist_min = opt->particle_dist_max = 0.0;
   return opt;
 }
 
@@ -49,6 +51,7 @@ void read_options_file(char * filename, Options * res){
   config_t config;
   const char * tmp;
   config_setting_t * root;
+  config_setting_t * s;
   config_setting_t * chem_formula;
   int i;
   char buffer[1024];
@@ -175,6 +178,22 @@ void read_options_file(char * filename, Options * res){
   if(config_lookup_string(&config,"precalculated_sf")){
     strcpy(res->sf_filename,config_lookup_string(&config,"precalculated_sf"));
   }
+  if(config_lookup(&config,"particle_number")){
+    s = config_lookup(&config,"particle_number");
+    res->particle_num_min = config_setting_get_int_elem (s, 0);
+    res->particle_num_max = config_setting_get_int_elem (s, 1);
+    if(res->particle_num_max == 0){
+      res->particle_num_max = res->particle_num_min;
+    }
+  }
+  if(config_lookup(&config,"particle_distance")){
+    s = config_lookup(&config,"particle_distance");
+	res->particle_dist_min = config_setting_get_float_elem (s, 0);
+	res->particle_dist_max = config_setting_get_float_elem (s, 1);
+	if(res->particle_dist_max == 0){
+	  res->particle_dist_max = res->particle_dist_min;
+	}
+  }
   res->detector->nx = rint(res->detector->width/res->detector->pixel_width);
   res->detector->ny = rint(res->detector->height/res->detector->pixel_height);
 }
@@ -183,6 +202,7 @@ void write_options_file(char * filename, Options * res){
   config_t config;
   config_setting_t * root;
   config_setting_t * s;
+  config_setting_t * e;
   config_setting_t * chem_formula;
   int i;
   char buffer[1024];
@@ -264,6 +284,17 @@ s = config_setting_add(root,"input_type",CONFIG_TYPE_STRING);
   s = config_setting_add(root,"experiment_beam_intensity",CONFIG_TYPE_FLOAT);
   config_setting_set_float(s,res->experiment->beam_intensity);
 
+  s = config_setting_add(root,"particle_number",CONFIG_TYPE_ARRAY);
+  e = config_setting_add(s, NULL, CONFIG_TYPE_INT);
+  config_setting_set_int(e, res->particle_num_min);
+  e = config_setting_add(s, NULL, CONFIG_TYPE_INT);
+  config_setting_set_int(e, res->particle_num_max);
+
+  s = config_setting_add(root,"particle_distance",CONFIG_TYPE_ARRAY);
+  e = config_setting_add(s, NULL, CONFIG_TYPE_FLOAT);
+  config_setting_set_int(e, res->particle_dist_min);
+  e = config_setting_add(s, NULL, CONFIG_TYPE_FLOAT);
+  config_setting_set_int(e, res->particle_dist_max);
 
   if(res->sf_filename[0]){
     s = config_setting_add(root,"precalculated_sf",CONFIG_TYPE_STRING);

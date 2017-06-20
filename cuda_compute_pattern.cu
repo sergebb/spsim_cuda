@@ -30,28 +30,30 @@ __device__ float scatt_factor(float d,int Z){
   return res;
 }
 
-__global__ void cuda_kernel_compute_pattern( int HKL_list_size, int natoms, float *dev_HKL_list, float * dev_pos, float *dev_i, int *dev_is_element_in_molecule) {
+__global__ void cuda_kernel_compute_pattern(int HKL_list_size, int natoms, float const* __restrict__ dev_HKL_list, float const* __restrict__ dev_pos, float *dev_i, int const* __restrict__ dev_is_element_in_molecule) {
     int tNum = blockIdx.x * blockDim.x + threadIdx.x;
     double scattering_factor;
     double scattering_vector_length;
     double scattering_factor_cache[ELEMENTS];
     double dev_F_R,dev_F_I;
+    double sin_phase, cos_phase;
 
     if (tNum < HKL_list_size) {
         dev_F_R = 0;
         dev_F_I = 0;
-        float* pixel_coord = dev_HKL_list+3*tNum;
-        scattering_vector_length = sqrt(pixel_coord[0]*pixel_coord[0] + pixel_coord[1]*pixel_coord[1] + pixel_coord[2]*pixel_coord[2]);
+        float pixel_coord_0 = dev_HKL_list[3*tNum];
+        float pixel_coord_1 = dev_HKL_list[3*tNum+1];
+        float pixel_coord_2 = dev_HKL_list[3*tNum+2];
+        scattering_vector_length = sqrt(pixel_coord_0*pixel_coord_0 + pixel_coord_1*pixel_coord_1 + pixel_coord_2*pixel_coord_2);
 //        scattering_vector_length = sqrt(dev_HLK_list[tNum]*dev_HLK_list[tNum] + dev_HLK_list[tNum + HKL_list_size]*dev_HLK_list[tNum + HKL_list_size] + dev_HLK_list[tNum + 2*HKL_list_size]*dev_HLK_list[tNum + 2*HKL_list_size]);
         for (int j = 0; j < ELEMENTS; j++) {
            if (dev_is_element_in_molecule[j]) {
                 scattering_factor_cache[j] = scatt_factor(scattering_vector_length, j);
-            }
+           }
         }
         for (int j = 0; j < natoms; j++) {
             scattering_factor = scattering_factor_cache[ tex1Dfetch(tex_atomic_number,j)];
-            double sin_phase, cos_phase;
-            sincos( 2 * M_PI * (pixel_coord[0] * dev_pos[3*j] + pixel_coord[1]* dev_pos[3*j + 1] + pixel_coord[2] * dev_pos[3*j + 2]), &sin_phase, &cos_phase );
+            sincos( 2 * M_PI * (pixel_coord_0 * dev_pos[3*j] + pixel_coord_1* dev_pos[3*j + 1] + pixel_coord_2 * dev_pos[3*j + 2]), &sin_phase, &cos_phase );
             dev_F_R += scattering_factor * cos_phase;
             dev_F_I += scattering_factor * sin_phase;
         }
@@ -126,7 +128,7 @@ __global__ void cuda_kernel_solid_angle( float *det_solid_angle, int det_nx, int
         /* left */
         projected_pixel_sides[1] = sqrt((corners[0][0] - corners[3][0])*(corners[0][0] - corners[3][0])+(corners[0][1] - corners[3][1])*(corners[0][1] - corners[3][1]));
         det_solid_angle[tNum] = projected_pixel_sides[0] * projected_pixel_sides[1] / (r * r);
-
+        
     }
 }
 
